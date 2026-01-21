@@ -282,25 +282,18 @@ class ReservationController extends Controller
     public function updateStatus(Request $request, $id)
     {
         try {
-            \Log::info('=== UPDATE STATUS START ===');
-            \Log::info('Request data:', $request->all());
-            \Log::info('Reservation ID:', ['id' => $id]);
-
             $validated = $request->validate([
                 'status' => 'required|in:menunggu,dikonfirmasi,sedang_berlangsung,selesai,dibatalkan'
             ]);
 
             $reservation = Reservation::findOrFail($id);
             $oldStatus = $reservation->status;
-            \Log::info('Before update:', ['old_status' => $oldStatus, 'new_status' => $validated['status']]);
 
             $reservation->status = $validated['status'];
             $saveResult = $reservation->save();
-            \Log::info('Save result:', ['result' => $saveResult]);
 
             // Verify the update
             $freshReservation = Reservation::find($id);
-            \Log::info('After save - Fresh from DB:', ['status' => $freshReservation->status]);
 
             // Update car status based on reservation status
             $car = $reservation->car;
@@ -321,7 +314,6 @@ class ReservationController extends Controller
                 'dibatalkan' => 'Dibatalkan'
             ];
 
-            \Log::info('=== UPDATE STATUS SUCCESS ===');
 
             return response()->json([
                 'success' => true,
@@ -330,8 +322,6 @@ class ReservationController extends Controller
                 'status_label' => $statusLabels[$validated['status']]
             ]);
         } catch (\Exception $e) {
-            \Log::error('=== UPDATE STATUS FAILED ===');
-            \Log::error('Error:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
             return response()->json([
                 'success' => false,

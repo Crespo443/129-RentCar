@@ -243,9 +243,6 @@ class CarController extends Controller
     public function store(Request $request)
     {
         try {
-            \Log::info('=== CAR CREATE START ===');
-            \Log::info('Request All Data:', $request->all());
-
             $validated = $request->validate([
                 'brand' => 'required|string|max:255',
                 'model' => 'required|string|max:255',
@@ -298,10 +295,7 @@ class CarController extends Controller
             $data['available_for_long_term'] = $request->has('available_for_long_term');
             $data['minimum_rental_days'] = $request->minimum_rental_days ?? 1;
 
-            \Log::info('Data to Create:', $data);
             $car = Car::create($data);
-            \Log::info('Car Created:', $car->toArray());
-            \Log::info('=== CAR CREATE SUCCESS ===');
 
             if ($request->wantsJson()) {
                 return response()->json([
@@ -313,7 +307,6 @@ class CarController extends Controller
 
             return redirect('/admin/cars')->with('success', 'Mobil berhasil ditambahkan');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation Error:', $e->errors());
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -323,7 +316,6 @@ class CarController extends Controller
             }
             throw $e;
         } catch (\Exception $e) {
-            \Log::error('Create Car Error:', ['message' => $e->getMessage()]);
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -358,11 +350,6 @@ class CarController extends Controller
     public function update(Request $request, Car $car)
     {
         try {
-            \Log::info('=== CAR UPDATE START ===');
-            \Log::info('Car ID:', ['id' => $car->id]);
-            \Log::info('Request All Data:', $request->all());
-            \Log::info('Car Before Update:', $car->toArray());
-
             $validated = $request->validate([
                 'brand' => 'required|string|max:255',
                 'model' => 'required|string|max:255',
@@ -421,13 +408,7 @@ class CarController extends Controller
             $data['available_for_long_term'] = $request->has('available_for_long_term');
             $data['minimum_rental_days'] = $request->minimum_rental_days ?? 1;
 
-            \Log::info('Data to Update:', $data);
             $car->update($data);
-
-
-            $freshCar = Car::find($car->id);
-            \Log::info('Car After Update (Fresh from DB):', $freshCar->toArray());
-            \Log::info('=== CAR UPDATE SUCCESS ===');
 
             if ($request->wantsJson()) {
                 return response()->json([
