@@ -240,11 +240,13 @@
 
                                 <!-- Car Info -->
                                 <div class="flex items-center space-x-4 mb-6">
-                                    <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400"
-                                        alt="BMW X5" class="w-16 h-12 object-cover rounded-lg">
+                                    <img src="{{ $reservation->car->image ?? 'https://via.placeholder.com/400x300?text=No+Image' }}"
+                                        alt="{{ $reservation->car->brand }} {{ $reservation->car->model }}"
+                                        class="w-16 h-12 object-cover rounded-lg">
                                     <div>
-                                        <h4 class="font-semibold text-gray-800">BMW X5</h4>
-                                        <p class="text-sm text-gray-600">Luxury SUV</p>
+                                        <h4 class="font-semibold text-gray-800">{{ $reservation->car->brand }}
+                                            {{ $reservation->car->model }}</h4>
+                                        <p class="text-sm text-gray-600">{{ $reservation->car->category }}</p>
                                     </div>
                                 </div>
 
@@ -252,15 +254,16 @@
                                 <div class="space-y-3 mb-6">
                                     <div class="flex justify-between items-center">
                                         <span class="text-gray-600">Tanggal Mulai</span>
-                                        <span class="font-medium">12/11/2025</span>
+                                        <span
+                                            class="font-medium">{{ $reservation->start_date->format('d/m/Y') }}</span>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span class="text-gray-600">Tanggal Selesai</span>
-                                        <span class="font-medium">15/11/2025</span>
+                                        <span class="font-medium">{{ $reservation->end_date->format('d/m/Y') }}</span>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span class="text-gray-600">Durasi</span>
-                                        <span class="font-medium">3 hari</span>
+                                        <span class="font-medium">{{ $reservation->total_days }} hari</span>
                                     </div>
                                 </div>
 
@@ -269,18 +272,19 @@
                                     <div class="space-y-2 mb-4">
                                         <div class="flex justify-between items-center">
                                             <span class="text-gray-600">Harga per hari</span>
-                                            <span>Rp 960.000</span>
+                                            <span>{{ $reservation->car->formatted_discounted_price }}</span>
                                         </div>
                                         <div class="flex justify-between items-center">
                                             <span class="text-gray-600">Jumlah hari</span>
-                                            <span>3 hari</span>
+                                            <span>{{ $reservation->total_days }} hari</span>
                                         </div>
                                     </div>
                                     <div class="border-t pt-3">
                                         <div class="flex justify-between items-center">
                                             <span class="text-lg font-semibold text-gray-800">Total
                                                 Pembayaran</span>
-                                            <span class="text-xl font-bold text-orange-600">Rp 2.880.000</span>
+                                            <span
+                                                class="text-xl font-bold text-orange-600">{{ $reservation->formatted_total_price }}</span>
                                         </div>
                                     </div>
                                 </div>

@@ -146,86 +146,91 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Mobil 1: Toyota Avanza -->
-                    <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
-                        <td class="px-6 py-4">
-                            <div class="w-16 h-16 rounded-lg border-2 border-orange-500 overflow-hidden">
-                                <img loading="lazy"
-                                    src="https://tse2.mm.bing.net/th/id/OIP.8NigPGR5EtQOGZPAn_gpPgHaEo?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3"
-                                    alt="Toyota Avanza" class="w-full h-full object-cover">
-                            </div>
-                        </td>
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                            Toyota
-                        </th>
-                        <td class="px-6 py-4">
-                            Avanza
-                        </td>
-                        <td class="px-6 py-4">
-                            1.5L
-                        </td>
-                        <td class="px-6 py-4">
-                            Rp 350.000
-                        </td>
-                        <td class="px-6 py-4 font-semibold text-blue-600">
-                            B 1234 XYZ
-                        </td>
-                        <td class="px-6 py-4">
-                            2023
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                                Tersedia
-                            </span>
-                        </td>
-                        <td class="flex my-4 py-3 px-6 space-x-3">
-                            <a href="/admin/cars/1/edit" class="font-medium text-blue-600 hover:underline">Edit</a>
-                            <button onclick="hapusMobil(1, 'Toyota Avanza')"
-                                class="font-medium text-red-600 hover:underline">Hapus</button>
-                        </td>
-                    </tr>
-
-                    <!-- Mobil 2: Honda CR-V -->
-                    <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
-                        <td class="px-6 py-4">
-                            <div class="w-16 h-16 rounded-lg border-2 border-orange-500 overflow-hidden">
-                                <img loading="lazy"
-                                    src="https://tse2.mm.bing.net/th/id/OIP.8NigPGR5EtQOGZPAn_gpPgHaEo?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3"
-                                    alt="Honda CR-V" class="w-full h-full object-cover">
-                            </div>
-                        </td>
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                            Honda
-                        </th>
-                        <td class="px-6 py-4">
-                            CR-V
-                        </td>
-                        <td class="px-6 py-4">
-                            2.0L Turbo
-                        </td>
-                        <td class="px-6 py-4">
-                            Rp 750.000
-                        </td>
-                        <td class="px-6 py-4 font-semibold text-blue-600">
-                            DD 5678 ABC
-                        </td>
-                        <td class="px-6 py-4">
-                            2024
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">
-                                Disewa
-                            </span>
-                        </td>
-                        <td class="flex my-4 py-3 px-6 space-x-3">
-                            <a href="/admin/cars/2/edit" class="font-medium text-blue-600 hover:underline">Edit</a>
-                            <button onclick="hapusMobil(2, 'Honda CR-V')"
-                                class="font-medium text-red-600 hover:underline">Hapus</button>
-                        </td>
-                    </tr>
+                    @forelse($cars as $car)
+                        <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
+                            <td class="px-6 py-4">
+                                <div class="w-16 h-16 rounded-lg border-2 border-orange-500 overflow-hidden">
+                                    @if ($car->image)
+                                        <img loading="lazy" src="{{ asset($car->image) }}"
+                                            alt="{{ $car->brand }} {{ $car->model }}"
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                            <span class="text-gray-400 text-xs">No Image</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </td>
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                {{ $car->brand }}
+                            </th>
+                            <td class="px-6 py-4">
+                                {{ $car->model }}
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ $car->engine ?? '-' }}
+                            </td>
+                            <td class="px-6 py-4">
+                                Rp {{ number_format($car->price_per_day ?? 0, 0, ',', '.') }}
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-blue-600">
+                                {{ $car->police_number ?? '-' }}
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ $car->year ?? '-' }}
+                            </td>
+                            <td class="px-6 py-4">
+                                @if ($car->status === 'tersedia')
+                                    <span
+                                        class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
+                                        Tersedia
+                                    </span>
+                                @elseif($car->status === 'disewa')
+                                    <span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">
+                                        Disewa
+                                    </span>
+                                @else
+                                    <span
+                                        class="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 rounded-full">
+                                        {{ ucfirst($car->status) }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="flex my-4 py-3 px-6 space-x-3">
+                                <a href="/admin/cars/{{ $car->id }}/edit"
+                                    class="font-medium text-blue-600 hover:underline">Edit</a>
+                                <button
+                                    onclick="hapusMobil({{ $car->id }}, '{{ $car->brand }} {{ $car->model }}')"
+                                    class="font-medium text-red-600 hover:underline">Hapus</button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                                <div class="flex flex-col items-center justify-center">
+                                    <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                        </path>
+                                    </svg>
+                                    <p class="text-lg font-semibold">Belum ada data mobil</p>
+                                    <p class="text-sm text-gray-400 mt-2">Klik tombol "Tambah Mobil" untuk menambahkan
+                                        data baru</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Links -->
+        @if ($cars->hasPages())
+            <div class="mt-6">
+                {{ $cars->links() }}
+            </div>
+        @endif
     </div>
 
     <script>
@@ -242,13 +247,54 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Tampilkan loading
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: 'Data ' + namaMobil + ' berhasil dihapus',
-                        showConfirmButton: false,
-                        timer: 2000
+                        title: 'Menghapus...',
+                        text: 'Mohon tunggu',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
                     });
+
+                    // Kirim request delete ke server
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                    fetch('/admin/cars/' + id, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: 'Data ' + namaMobil + ' berhasil dihapus',
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: data.message || 'Gagal menghapus data mobil'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Terjadi kesalahan: ' + error.message
+                            });
+                        });
                 }
             });
         }

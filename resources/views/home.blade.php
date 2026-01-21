@@ -13,6 +13,7 @@
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       {{-- flatpickr JS --}}
       @include('flatpickr::components.style')
+      <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
       @vite('resources/css/app.css')
       @vite('resources/js/app.js')
       <style>
@@ -32,25 +33,63 @@
                       <img loading="lazy" src="/storage/images/logos/loogo2.png" class="mr-3 h-12" alt="Logo" />
                   </a>
 
-                  <!-- login & Register buttons -->
+                  <!-- User Menu / Auth Buttons -->
                   <div class="flex items-center lg:order-2">
-                      <a href="/">
-                          <button type="button"
-                              class="px-4 lg:px-5 py-2 lg:py-2.5 mr-2 text-white bg-gradient-to-br from-orange-400 to-orange-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm">
-                              Masuk
+                      @if (!session('user_login'))
+                          <a href="/">
+                              <button type="button"
+                                  class="px-4 lg:px-5 py-2 lg:py-2.5 mr-2 text-white bg-gradient-to-br from-orange-400 to-orange-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm">
+                                  Masuk
+                              </button>
+                          </a>
+                          <a href="/register">
+                              <button
+                                  class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200">
+                                  <span
+                                      class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white text-black rounded-md group-hover:bg-opacity-0">
+                                      Daftar Sekarang
+                                  </span>
+                              </button>
+                          </a>
+                      @else
+                          {{-- Client Dropdown --}}
+                          <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown"
+                              class="text-black bg-pr-400 hover:bg-pr-600 font-medium rounded-lg text-sm px-3 py-2.5 text-center inline-flex items-center"
+                              type="button">
+                              <img loading="lazy" src="/storage/images/user.png" width="24" alt="user icon"
+                                  class="mr-3">
+                              {{ session('user_name') ?? 'Guest' }}
+                              <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor"
+                                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 9l-7 7-7-7"></path>
+                              </svg>
                           </button>
-                      </a>
-                      <a href="/register">
-                          <button
-                              class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200">
-                              <span
-                                  class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white text-black rounded-md group-hover:bg-opacity-0">
-                                  Daftar Sekarang
-                              </span>
-                          </button>
-                      </a>
 
-
+                          <!-- Dropdown menu -->
+                          <div id="dropdown"
+                              class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+                              <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownDefaultButton">
+                                  <li>
+                                      <a href="/profile" class="block px-4 py-2 hover:bg-pr-200">Profile</a>
+                                  </li>
+                                  <li>
+                                      <a href="{{ route('my-reservations') }}"
+                                          class="block px-4 py-2 hover:bg-pr-200">Reservasi Saya</a>
+                                  </li>
+                                  <li>
+                                      <a class="block px-4 py-2 hover:bg-pr-200" href="/logout"
+                                          onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
+                                          Logout
+                                      </a>
+                                      <form id="logout-form" action="/logout" method="POST" class="hidden">
+                                          @csrf
+                                      </form>
+                                  </li>
+                              </ul>
+                          </div>
+                      @endif
                   </div>
 
                   <!-- Menu -->
@@ -103,12 +142,21 @@
                                   MOBIL
                               </button>
                           </a>
-                          <a href="/" class="w-full sm:w-auto">
-                              <button
-                                  class="w-full sm:w-40 px-6 py-3 bg-transparent hover:bg-orange-500 text-orange-500 hover:text-white font-semibold rounded-lg border-2 border-orange-500 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl">
-                                  Masuk
-                              </button>
-                          </a>
+                          @if (!session('user_login'))
+                              <a href="/" class="w-full sm:w-auto">
+                                  <button
+                                      class="w-full sm:w-40 px-6 py-3 bg-transparent hover:bg-orange-500 text-orange-500 hover:text-white font-semibold rounded-lg border-2 border-orange-500 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl">
+                                      Masuk
+                                  </button>
+                              </a>
+                          @else
+                              <a href="{{ route('my-reservations') }}" class="w-full sm:w-auto">
+                                  <button
+                                      class="w-full sm:w-40 px-6 py-3 bg-transparent hover:bg-orange-500 text-orange-500 hover:text-white font-semibold rounded-lg border-2 border-orange-500 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl">
+                                      Reservasi Saya
+                                  </button>
+                              </a>
+                          @endif
                       </div>
                   </div>
                   <div class="md:w-3/5 hidden md:block  ">
@@ -138,214 +186,75 @@
                   </div>
               </div>
 
-              <div class=" grid md:grid-cols-3  md:ps-4 justify-center p-2 gap-4 items-center mx-auto max-w-screen-xl ">
+              <div
+                  class=" grid md:grid-cols-3  md:ps-4 justify-center p-2 gap-4 items-center mx-auto max-w-screen-xl ">
 
-                  <div
-                      class="relative md:m-10 flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
-                      <a class="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl" href="/cars/1">
-                          <img loading="lazy" class="object-cover"
-                              src="https://tse2.mm.bing.net/th/id/OIP.8NigPGR5EtQOGZPAn_gpPgHaEo?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3"
-                              alt="product image" />
-                          <span
-                              class="absolute top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">15%
-                              OFF</span>
-                      </a>
-                      <div class="mt-4 px-5 pb-5">
-                          <div>
-                              <a href="/cars/1">
-                                  <h5
-                                      class="font-bold text-xl tracking-tight text-slate-900 hover:text-orange-500 transition-colors">
-                                      Toyota Camry 2.5L</h5>
-                              </a>
-                          </div>
-                          <div class="mt-2 mb-5 flex items-center justify-between">
-                              <p>
-                                  <span class="text-xl font-bold text-slate-900">Rp 425.000</span>
-                                  <br>
-                                  <span class="text-sm text-slate-900 line-through">Rp 500.000</span>
-                              </p>
-                              <div class="flex items-center">
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
+                  @forelse($featuredCars as $car)
+                      <div
+                          class="relative md:m-10 flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
+                          <a class="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl"
+                              href="/cars/{{ $car->id }}">
+                              <img loading="lazy" class="object-cover"
+                                  src="{{ $car->image ?? 'https://via.placeholder.com/400x300?text=No+Image' }}"
+                                  alt="{{ $car->brand }} {{ $car->model }}" />
+                              @if ($car->reduce > 0)
                                   <span
-                                      class="mr-2 ml-3 rounded bg-orange-400 px-2.5 py-0.5 text-xs font-semibold">5.0</span>
-                              </div>
-                          </div>
-                          <a href="/cars/1"
-                              class="flex items-center justify-center rounded-md bg-slate-900 hover:bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
-                              <svg class="mr-4 h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                  <path fill-rule="evenodd"
-                                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                      clip-rule="evenodd" />
-                              </svg>
-                              Lihat Detail</a>
-                      </div>
-                  </div>
-
-                  <div
-                      class="relative md:m-10 flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
-                      <a class="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl" href="/cars/2">
-                          <img loading="lazy" class="object-cover"
-                              src="https://tse2.mm.bing.net/th/id/OIP.8NigPGR5EtQOGZPAn_gpPgHaEo?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3"
-                              alt="product image" />
-                          <span
-                              class="absolute top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">10%
-                              OFF</span>
-                      </a>
-                      <div class="mt-4 px-5 pb-5">
-                          <div>
-                              <a href="/cars/2">
-                                  <h5
-                                      class="font-bold text-xl tracking-tight text-slate-900 hover:text-orange-500 transition-colors">
-                                      Honda Civic 1.8L</h5>
-                              </a>
-                          </div>
-                          <div class="mt-2 mb-5 flex items-center justify-between">
-                              <p>
-                                  <span class="text-xl font-bold text-slate-900">Rp 405.000</span>
-                                  <br>
-                                  <span class="text-sm text-slate-900 line-through">Rp 450.000</span>
-                              </p>
-                              <div class="flex items-center">
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
+                                      class="absolute top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">{{ $car->reduce }}%
+                                      OFF</span>
+                              @endif
+                              @if ($car->status === 'disewa')
                                   <span
-                                      class="mr-2 ml-3 rounded bg-orange-400 px-2.5 py-0.5 text-xs font-semibold">4.0</span>
+                                      class="absolute top-0 right-0 m-2 rounded-full bg-red-500 px-2 text-center text-sm font-medium text-white">Disewa</span>
+                              @endif
+                          </a>
+                          <div class="mt-4 px-5 pb-5">
+                              <div>
+                                  <a href="/cars/{{ $car->id }}">
+                                      <h5
+                                          class="font-bold text-xl tracking-tight text-slate-900 hover:text-orange-500 transition-colors">
+                                          {{ $car->brand }} {{ $car->model }}</h5>
+                                  </a>
                               </div>
-                          </div>
-                          <a href="/cars/2"
-                              class="flex items-center justify-center rounded-md bg-slate-900 hover:bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
-                              <svg class="mr-4 h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                  <path fill-rule="evenodd"
-                                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                      clip-rule="evenodd" />
-                              </svg>
-                              Lihat Detail</a>
-                      </div>
-                  </div>
-
-                  <div
-                      class="relative md:m-10 flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
-                      <a class="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl" href="/cars/3">
-                          <img loading="lazy" class="object-cover"
-                              src="https://tse2.mm.bing.net/th/id/OIP.8NigPGR5EtQOGZPAn_gpPgHaEo?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3"
-                              alt="product image" />
-                          <span
-                              class="absolute top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">20%
-                              OFF</span>
-                      </a>
-                      <div class="mt-4 px-5 pb-5">
-                          <div>
-                              <a href="/cars/3">
-                                  <h5
-                                      class="font-bold text-xl tracking-tight text-slate-900 hover:text-orange-500 transition-colors">
-                                      BMW X5 3.0L</h5>
-                              </a>
-                          </div>
-                          <div class="mt-2 mb-5 flex items-center justify-between">
-                              <p>
-                                  <span class="text-xl font-bold text-slate-900">Rp 960.000</span>
-                                  <br>
-                                  <span class="text-sm text-slate-900 line-through">Rp 1.200.000</span>
-                              </p>
-                              <div class="flex items-center">
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                                      viewBox="0 0 20 20">
-                                      <path
-                                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                      </path>
-                                  </svg>
-                                  <span
-                                      class="mr-2 ml-3 rounded bg-orange-400 px-2.5 py-0.5 text-xs font-semibold">5.0</span>
+                              <div class="mt-2 mb-5 flex items-center justify-between">
+                                  <p>
+                                      <span
+                                          class="text-xl font-bold text-slate-900">{{ $car->formatted_discounted_price }}</span>
+                                      <br>
+                                      @if ($car->reduce > 0)
+                                          <span
+                                              class="text-sm text-slate-900 line-through">{{ $car->formatted_price }}</span>
+                                      @endif
+                                  </p>
+                                  <div class="flex items-center">
+                                      @for ($i = 1; $i <= 5; $i++)
+                                          <svg aria-hidden="true"
+                                              class="h-5 w-5 {{ $i <= $car->stars ? 'text-orange-400' : 'text-gray-300' }}"
+                                              fill="currentColor" viewBox="0 0 20 20">
+                                              <path
+                                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                              </path>
+                                          </svg>
+                                      @endfor
+                                      <span
+                                          class="mr-2 ml-3 rounded bg-orange-400 px-2.5 py-0.5 text-xs font-semibold">{{ number_format($car->stars, 1) }}</span>
+                                  </div>
                               </div>
+                              <a href="/cars/{{ $car->id }}"
+                                  class="flex items-center justify-center rounded-md bg-slate-900 hover:bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
+                                  <svg class="mr-4 h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                      <path fill-rule="evenodd"
+                                          d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                          clip-rule="evenodd" />
+                                  </svg>
+                                  Lihat Detail</a>
                           </div>
-                          <a href="/cars/3"
-                              class="flex items-center justify-center rounded-md bg-slate-900 hover:bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
-                              <svg class="mr-4 h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                  <path fill-rule="evenodd"
-                                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                      clip-rule="evenodd" />
-                              </svg>
-                              Lihat Detail</a>
                       </div>
-                  </div>
+                  @empty
+                      <div class="col-span-3 text-center py-12">
+                          <p class="text-gray-500 text-lg">Tidak ada mobil tersedia saat ini.</p>
+                      </div>
+                  @endforelse
 
               </div>
 

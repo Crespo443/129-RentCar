@@ -11,7 +11,6 @@
 </head>
 
 <body class="bg-gray-50">
-
     {{-- Navbar --}}
     <header>
         <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 shadow-md">
@@ -45,7 +44,6 @@
                         </li>
                     </ul>
                 </div>
-
                 {{-- Dropdown --}}
                 <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown"
                     class="text-black bg-pr-400 hover:bg-pr-600 font-medium rounded-lg text-sm px-3 py-2.5 text-center inline-flex items-center "
@@ -58,17 +56,20 @@
                         </path>
                     </svg>
                 </button>
-
                 <div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
                     <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownDefaultButton">
                         <li>
-                            <a href="/profile" class="block px-4 py-2 hover:bg-pr-200">Profil</a>
+                            <a href="/profile" class="block px-4 py-2 hover:bg-pr-200">Profile</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('my-reservations') }}" class="block px-4 py-2 hover:bg-pr-200">Reservasi
+                                Saya</a>
                         </li>
                         <li>
                             <a class="block px-4 py-2 hover:bg-pr-200 " href="/logout"
                                 onclick="event.preventDefault();
                                             document.getElementById('logout-form').submit();">
-                                Keluar
+                                Logout
                             </a>
                             <form id="logout-form" action="/logout" method="POST" class="hidden">
                                 @csrf
@@ -79,7 +80,6 @@
             </div>
         </nav>
     </header>
-
     {{-- Main Content --}}
     <main class="max-w-4xl mx-auto px-4 py-8">
         <div class="bg-white rounded-lg shadow-md p-8">
@@ -96,7 +96,7 @@
                 </div>
             @endif
 
-            
+
             @if (session('error'))
                 <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                     {{ session('error') }}
@@ -118,7 +118,7 @@
                     @enderror
                 </div>
 
-                
+
                 <div class="border-b border-gray-200 pb-6">
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" name="email" id="email"
@@ -138,7 +138,6 @@
                         disabled>
                     <p class="text-sm text-gray-500 mt-1">Password tidak dapat diubah di halaman ini</p>
                 </div>
-
                 {{-- Role (Disabled) --}}
                 <div class="border-b border-gray-200 pb-6">
                     <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
@@ -147,7 +146,6 @@
                         disabled>
                     <p class="text-sm text-gray-500 mt-1">Role tidak dapat diubah</p>
                 </div>
-
                 {{-- Action Buttons --}}
                 <div class="flex space-x-4 pt-4">
                     <button type="submit"
@@ -162,7 +160,6 @@
             </form>
         </div>
     </main>
-
 </body>
 
 </html>

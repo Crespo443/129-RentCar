@@ -11,4 +11,3 @@ class data_user_model extends Model
     protected $table = 'data_user';
     protected $fillable = ['name', 'email', 'password', 'role'];
 }
-

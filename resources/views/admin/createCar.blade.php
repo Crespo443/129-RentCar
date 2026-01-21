@@ -1,18 +1,18 @@
  <!DOCTYPE html>
- <html lang="in">
+ <html lang="en">
 
  <head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <meta http-equiv="X-UA-Compatible" content="ie=edge">
      <meta name="csrf-token" content="{{ csrf_token() }}">
-     <title>{{ config('app.name', 'FunCar') }}</title>
+     <title>{{ config('app.name', 'RentCar') }}</title>
      {{-- jquery --}}
      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
      {{-- sweet alert --}}
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-     {{-- flatpickr JS --}}
-     @include('flatpickr::components.style')
+     {{-- flatpickr CSS --}}
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
      @vite('resources/css/app.css')
      @vite('resources/js/app.js')
      <style>
@@ -84,7 +84,7 @@
                              <a class="block px-4 py-2 hover:bg-pr-200 " href="/logout"
                                  onclick="event.preventDefault();
                                                     document.getElementById('logout-form').submit();">
-                                 Logout
+                                 Keluar
                              </a>
 
                              <form id="logout-form" action="/logout" method="POST" class="hidden">
@@ -97,79 +97,71 @@
              </div>
          </nav>
      </header>
-     <div class="flex flex-col items-center justify-center max-w-screen-xl mx-auto my-20 ">
-         <form class="w-full " action="/admin/cars" method="POST" enctype="multipart/form-data">
+     <div class="my-20 flex flex-col justify-center items-center mx-auto max-w-screen-xl">
+         <form class="w-full" method='POST' action='/admin/cars' id="createCarForm" enctype="multipart/form-data">
              @csrf
              <div
-                 class="md:w-2/3 w-5/6 md:px-24 px-4 pb-8 mx-auto mt-2 space-y-12 bg-white border-2 border-gray-600 rounded-md">
-                 <div class="pb-12 border-b border-gray-900/10">
-                     <h2 class="mt-2 text-lg font-bold leading-7 text-center text-gray-900">Isi detail mobil baru</h2>
+                 class="md:w-2/3 w-5/6 md:px-24 px-4 pb-8 mx-auto mt-2 space-y-12 bg-white border-2 border-gray-300 rounded-md shadow-lg">
+                 <div class="border-b border-gray-300 pb-12">
+                     <h2 class="mt-2 text-center font-bold text-2xl leading-7 text-gray-900">Tambah Mobil Baru</h2>
 
-                     <div class="grid grid-cols-1 mt-10 gap-x-6 gap-y-8 sm:grid-cols-6">
-
+                     <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                          <div class="sm:col-span-3">
                              <label for="brand"
                                  class="block text-sm font-medium leading-6 text-gray-900">Merek</label>
                              <div class="mt-2">
-                                 <input type="text" name="brand" id="brand"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
+                                 <input type="text" name="brand" id="brand" required
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
                              </div>
-
                          </div>
-
-
 
                          <div class="sm:col-span-3">
                              <label for="model"
                                  class="block text-sm font-medium leading-6 text-gray-900">Model</label>
                              <div class="mt-2">
-                                 <input type="text" name="model" id="model"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
+                                 <input type="text" name="model" id="model" required
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
                              </div>
-
                          </div>
 
                          <div class="sm:col-span-2 sm:col-start-1">
                              <label for="engine"
                                  class="block text-sm font-medium leading-6 text-gray-900">Mesin</label>
                              <div class="mt-2">
-                                 <input type="text" name="engine" id="engine"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
+                                 <input type="text" name="engine" id="engine" required
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
                              </div>
-
                          </div>
 
                          <div class="sm:col-span-2">
-                             <label for="police_number" class="block text-sm font-medium leading-6 text-gray-900">Nomor
+                             <label for="police_number"
+                                 class="block text-sm font-medium leading-6 text-gray-900">Nomor
                                  Polisi</label>
                              <div class="mt-2">
-                                 <input type="text" name="police_number" id="police_number"
-                                     placeholder="e.g., B 1234 ABC"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
+                                 <input type="text" name="police_number" id="police_number" required
+                                     placeholder="Contoh: B 1234 ABC"
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
                              </div>
-
                          </div>
 
                          <div class="sm:col-span-2">
                              <label for="price_per_day"
-                                 class="block text-sm font-medium leading-6 text-gray-900">Harga per
-                                 Hari (Rp)</label>
+                                 class="block text-sm font-medium leading-6 text-gray-900">Harga
+                                 per Hari (Rp)</label>
                              <div class="mt-2">
-                                 <input type="number" name="price_per_day" id="price_per_day"
+                                 <input type="number" name="price_per_day" id="price_per_day" required
                                      placeholder="Contoh: 500000"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
                              </div>
-
                          </div>
 
                          <div class="sm:col-span-3">
-                             <label for="" class="block text-sm font-medium leading-6 text-gray-900">Diskon %
-                             </label>
+                             <label for="reduce" class="block text-sm font-medium leading-6 text-gray-900">Diskon
+                                 %</label>
                              <div class="mt-2">
-                                 <input type="number" name="reduce" id="reduce"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
+                                 <input type="number" name="reduce" id="reduce" placeholder="0"
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
                              </div>
-
                          </div>
 
                          <div class="sm:col-span-3">
@@ -177,339 +169,374 @@
                                  Mobil</label>
                              <div class="mt-2">
                                  <select id="stars" name="stars"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:max-w-xs sm:text-sm sm:leading-6">
-                                     <option disabled selected value="1">
-                                         ⭐⭐⭐⭐⭐
-                                     </option>
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:max-w-xs sm:text-sm sm:leading-6">
+                                     <option value="">Pilih rating</option>
                                      <option value="1">1/5</option>
                                      <option value="2">2/5</option>
                                      <option value="3">3/5</option>
                                      <option value="4">4/5</option>
-                                     <option value="5">5/5</option>
+                                     <option value="5">5/5 ⭐⭐⭐⭐⭐</option>
                                  </select>
                              </div>
-
                          </div>
 
-                         <!-- New Car Attributes -->
                          <div class="sm:col-span-3">
-                             <label for="transmission"
-                                 class="block text-sm font-medium leading-6 text-gray-900">Transmisi</label>
+                             <label for="year"
+                                 class="block text-sm font-medium leading-6 text-gray-900">Tahun</label>
                              <div class="mt-2">
-                                 <select id="transmission" name="transmission"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
-                                     <option value="Manual">Manual</option>
-                                     <option value="Automatic" selected>Otomatis</option>
+                                 <select id="year" name="year" required
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:max-w-xs sm:text-sm sm:leading-6">
+                                     <option value="">Pilih tahun</option>
+                                     @for ($y = 2020; $y <= 2026; $y++)
+                                         <option value="{{ $y }}">
+                                             {{ $y }}</option>
+                                     @endfor
                                  </select>
                              </div>
-
                          </div>
 
                          <div class="sm:col-span-3">
                              <label for="fuel_type" class="block text-sm font-medium leading-6 text-gray-900">Jenis
-                                 Bahan
-                                 Bakar</label>
+                                 Bahan Bakar</label>
                              <div class="mt-2">
-                                 <select id="fuel_type" name="fuel_type"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
-                                     <option value="Petrol" selected>Bensin</option>
-                                     <option value="Diesel">Solar</option>
-                                     <option value="Electric">Listrik</option>
-                                     <option value="Hybrid">Hybrid</option>
+                                 <select id="fuel_type" name="fuel_type" required
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
+                                     <option value="">Pilih jenis bahan bakar</option>
+                                     <option value="bensin">Bensin</option>
+                                     <option value="diesel">Solar</option>
+                                     <option value="hybrid">Hybrid</option>
+                                     <option value="electric">Listrik</option>
                                  </select>
                              </div>
-
                          </div>
 
-                         <div class="sm:col-span-2">
+                         <div class="sm:col-span-3">
+                             <label for="transmission"
+                                 class="block text-sm font-medium leading-6 text-gray-900">Transmisi</label>
+                             <div class="mt-2">
+                                 <select id="transmission" name="transmission" required
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
+                                     <option value="">Pilih transmisi</option>
+                                     <option value="manual">Manual</option>
+                                     <option value="automatic">Otomatis</option>
+                                     <option value="cvt">CVT</option>
+                                 </select>
+                             </div>
+                         </div>
+
+                         <div class="sm:col-span-3">
                              <label for="seats" class="block text-sm font-medium leading-6 text-gray-900">Jumlah
                                  Kursi</label>
                              <div class="mt-2">
-                                 <select id="seats" name="seats"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
-                                     <option value="2">2 Kursi</option>
-                                     <option value="4">4 Kursi</option>
-                                     <option value="5" selected>5 Kursi</option>
-                                     <option value="7">7 Kursi</option>
-                                     <option value="8">8 Kursi</option>
+                                 <select id="seats" name="seats" required
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
+                                     <option value="">Pilih jumlah kursi</option>
+                                     @for ($s = 2; $s <= 8; $s++)
+                                         <option value="{{ $s }}">
+                                             {{ $s }} kursi</option>
+                                     @endfor
                                  </select>
                              </div>
-
                          </div>
 
-                         <div class="sm:col-span-2">
+                         <div class="sm:col-span-3">
+                             <label for="color"
+                                 class="block text-sm font-medium leading-6 text-gray-900">Warna</label>
+                             <div class="mt-2">
+                                 <input type="text" name="color" id="color" required
+                                     placeholder="Contoh: Hitam, Putih, Merah, Biru"
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
+                             </div>
+                         </div>
+
+                         <div class="sm:col-span-3">
                              <label for="category"
                                  class="block text-sm font-medium leading-6 text-gray-900">Kategori</label>
                              <div class="mt-2">
-                                 <select id="category" name="category"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
-                                     <option value="Economy" selected>Ekonomi</option>
-                                     <option value="Compact">Kompak</option>
-                                     <option value="Luxury">Mewah</option>
+                                 <select id="category" name="category" required
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
+                                     <option value="">Pilih kategori</option>
+                                     <option value="Sedan">Sedan</option>
                                      <option value="SUV">SUV</option>
-                                     <option value="Sports">Sport</option>
-                                     <option value="Electric">Listrik</option>
+                                     <option value="MPV">MPV</option>
+                                     <option value="Hatchback">Hatchback</option>
+                                     <option value="Sport">Sport</option>
+                                     <option value="Van">Van</option>
                                  </select>
                              </div>
-
-                         </div>
-
-                         <div class="sm:col-span-2">
-                             <label for="year"
-                                 class="block text-sm font-medium leading-6 text-gray-900">Tahun</label>
-                             <div class="mt-2">
-                                 <input type="number" name="year" id="year" min="2000" max="2025"
-                                     value="2023"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
-                             </div>
-
-                         </div>
-
-                         <div class="sm:col-span-2">
-                             <label for="color"
-                                 class="block text-sm font-medium leading-6 text-gray-900">Color</label>
-                             <div class="mt-2">
-                                 <input type="text" name="color" id="color"
-                                     placeholder="e.g. Red, Blue, Black"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
-                             </div>
-
-                         </div>
-
-                         <div class="sm:col-span-2">
-                             <label for="mileage" class="block text-sm font-medium leading-6 text-gray-900">Jarak
-                                 Tempuh
-                                 (km)</label>
-                             <div class="mt-2">
-                                 <input type="number" name="mileage" id="mileage" step="1"
-                                     placeholder="Contoh: 50000"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
-                             </div>
-
-                         </div>
-
-                         <div class="sm:col-span-2">
-                             <label for="minimum_rental_days"
-                                 class="block text-sm font-medium leading-6 text-gray-900">Minimum Hari Sewa</label>
-                             <div class="mt-2">
-                                 <input type="number" name="minimum_rental_days" id="minimum_rental_days"
-                                     min="1" value="1"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
-                             </div>
-
-                         </div>
-
-                         <div class="sm:col-span-6">
-                             <label for="available_for_long_term" class="flex items-center">
-                                 <input type="checkbox" name="available_for_long_term" id="available_for_long_term"
-                                     value="1"
-                                     class="rounded border-gray-300 text-pr-400 focus:ring-pr-400 focus:ring-2">
-                                 <span class="ml-2 text-sm text-gray-900">Tersedia untuk sewa jangka panjang</span>
-                             </label>
-
-                         </div>
-
-                         <div class="col-span-full">
-                             <label for="features"
-                                 class="block text-sm font-medium leading-6 text-gray-900">Fitur</label>
-                             <div class="mt-2">
-                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                     <label class="flex items-center">
-                                         <input type="checkbox" name="features[]" value="AC"
-                                             class="rounded border-gray-300 text-pr-400 focus:ring-pr-400">
-                                         <span class="ml-2 text-sm">AC</span>
-                                     </label>
-                                     <label class="flex items-center">
-                                         <input type="checkbox" name="features[]" value="Bluetooth"
-                                             class="rounded border-gray-300 text-pr-400 focus:ring-pr-400">
-                                         <span class="ml-2 text-sm">Bluetooth</span>
-                                     </label>
-                                     <label class="flex items-center">
-                                         <input type="checkbox" name="features[]" value="GPS"
-                                             class="rounded border-gray-300 text-pr-400 focus:ring-pr-400">
-                                         <span class="ml-2 text-sm">GPS Navigasi</span>
-                                     </label>
-                                     <label class="flex items-center">
-                                         <input type="checkbox" name="features[]" value="USB Charging"
-                                             class="rounded border-gray-300 text-pr-400 focus:ring-pr-400">
-                                         <span class="ml-2 text-sm">Charger USB</span>
-                                     </label>
-                                     <label class="flex items-center">
-                                         <input type="checkbox" name="features[]" value="Premium Sound"
-                                             class="rounded border-gray-300 text-pr-400 focus:ring-pr-400">
-                                         <span class="ml-2 text-sm">Audio Premium</span>
-                                     </label>
-                                     <label class="flex items-center">
-                                         <input type="checkbox" name="features[]" value="Leather Seats"
-                                             class="rounded border-gray-300 text-pr-400 focus:ring-pr-400">
-                                         <span class="ml-2 text-sm">Jok Kulit</span>
-                                     </label>
-                                     <label class="flex items-center">
-                                         <input type="checkbox" name="features[]" value="Sunroof"
-                                             class="rounded border-gray-300 text-pr-400 focus:ring-pr-400">
-                                         <span class="ml-2 text-sm">Sunroof</span>
-                                     </label>
-                                     <label class="flex items-center">
-                                         <input type="checkbox" name="features[]" value="Parking Sensors"
-                                             class="rounded border-gray-300 text-pr-400 focus:ring-pr-400">
-                                         <span class="ml-2 text-sm">Parking Sensors</span>
-                                     </label>
-                                     <label class="flex items-center">
-                                         <input type="checkbox" name="features[]" value="Heated Seats"
-                                             class="rounded border-gray-300 text-pr-400 focus:ring-pr-400">
-                                         <span class="ml-2 text-sm">Heated Seats</span>
-                                     </label>
-                                 </div>
-                             </div>
-
-                         </div>
-
-                         <div class="col-span-full">
-                             <label for="description"
-                                 class="block text-sm font-medium leading-6 text-gray-900">Description</label>
-                             <div class="mt-2">
-                                 <textarea name="description" id="description" rows="3" placeholder="Describe the car features and benefits..."
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6"></textarea>
-                             </div>
-
-                         </div>
-
-
-
-
-                         <div class="col-span-full">
-                             <label for="cover-photo" class="block text-sm font-medium leading-6 text-gray-900">Gambar
-                                 Mobil</label>
-                             <div class="mt-2">
-                                 <!-- Multiple Image Upload -->
-                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                     <!-- Main Image -->
-                                     <div>
-                                         <label class="block text-sm font-medium text-gray-700 mb-2">Gambar
-                                             Utama</label>
-                                         <div
-                                             class="flex justify-center px-6 py-10 border border-dashed rounded-lg border-gray-900/25">
-                                             <div class="text-center">
-                                                 <svg class="w-12 h-12 mx-auto text-gray-300" viewBox="0 0 24 24"
-                                                     fill="currentColor" aria-hidden="true">
-                                                     <path fill-rule="evenodd"
-                                                         d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
-                                                         clip-rule="evenodd" />
-                                                 </svg>
-                                                 <div class="flex mt-4 text-sm leading-6 text-gray-600">
-                                                     <label for="main-image"
-                                                         class="relative font-semibold bg-white rounded-md cursor-pointer text-pr-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-pr-400 focus-within:ring-offset-2 hover:text-pr-400">
-                                                         <span>Upload gambar utama</span>
-                                                         <input id="main-image" name="main_image" type="file"
-                                                             accept="image/*" class="sr-only"
-                                                             onchange="previewImage(this, 'main-preview')">
-                                                     </label>
-                                                 </div>
-                                                 <p class="text-xs leading-5 text-gray-600">PNG, JPG, GIF up to 10MB
-                                                 </p>
-                                             </div>
-                                         </div>
-                                         <div id="main-preview" class="mt-2" style="display: none;">
-                                             <img class="w-full h-40 object-cover rounded-lg"
-                                                 alt="Main image preview">
-                                         </div>
-
-                                     </div>
-
-                                     <!-- Gallery Images -->
-                                     <div>
-                                         <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Galeri
-                                             (Opsional)</label>
-                                         <div
-                                             class="flex justify-center px-6 py-10 border border-dashed rounded-lg border-gray-900/25">
-                                             <div class="text-center">
-                                                 <svg class="w-12 h-12 mx-auto text-gray-300" viewBox="0 0 24 24"
-                                                     fill="currentColor" aria-hidden="true">
-                                                     <path fill-rule="evenodd"
-                                                         d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
-                                                         clip-rule="evenodd" />
-                                                 </svg>
-                                                 <div class="flex mt-4 text-sm leading-6 text-gray-600">
-                                                     <label for="gallery-images"
-                                                         class="relative font-semibold bg-white rounded-md cursor-pointer text-pr-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-pr-400 focus-within:ring-offset-2 hover:text-pr-400">
-                                                         <span>Upload gallery images</span>
-                                                         <input id="gallery-images" name="gallery_images[]"
-                                                             type="file" accept="image/*" multiple class="sr-only"
-                                                             onchange="previewMultipleImages(this, 'gallery-preview')">
-                                                     </label>
-                                                 </div>
-                                                 <p class="text-xs leading-5 text-gray-600">Select multiple images</p>
-                                             </div>
-                                         </div>
-                                         <div id="gallery-preview" class="mt-2 grid grid-cols-2 gap-2"
-                                             style="display: none;">
-                                             <!-- Gallery previews will be inserted here -->
-                                         </div>
-
-                                     </div>
-                                 </div>
-
-                                 <!-- Image URL Inputs (fallback) -->
-                                 <div class="mt-4 pt-4 border-t border-gray-200">
-                                     <h4 class="text-sm font-medium text-gray-700 mb-3">Atau Tambahkan URL</h4>
-                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                         <div>
-                                             <label for="image_url"
-                                                 class="block text-sm font-medium text-gray-700 mb-1">Gambar
-                                                 Utama</label>
-                                             <input type="url" name="image_url" id="image_url"
-                                                 placeholder="https://example.com/car-image.jpg"
-                                                 class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6">
-                                         </div>
-
-                                         <div>
-                                             <label for="gallery_urls"
-                                                 class="block text-sm font-medium text-gray-700 mb-1">Galery</label>
-                                             <textarea name="gallery_urls" id="gallery_urls" rows="2"
-                                                 placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                                                 class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:text-sm sm:leading-6"></textarea>
-                                         </div>
-                                     </div>
-                                 </div>
-                             </div>
-
                          </div>
 
                          <div class="sm:col-span-3">
                              <label for="status"
                                  class="block text-sm font-medium leading-6 text-gray-900">Status</label>
                              <div class="mt-2">
-                                 <select id="status" name="status"
-                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-pr-400 sm:max-w-xs sm:text-sm sm:leading-6">
-                                     <option value="Tersedia">Tersedia</option>
-                                     <option value="Disewa">Disewa</option>
-                                     <option value="Perbaikan">Perbaikan</option>
+                                 <select id="status" name="status" required
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
+                                     <option value="">Pilih status</option>
+                                     <option value="tersedia">Tersedia</option>
+                                     <option value="disewa">Disewa</option>
+                                     <option value="perbaikan">Perbaikan</option>
                                  </select>
                              </div>
-
                          </div>
 
+                         <div class="sm:col-span-3">
+                             <label for="doors" class="block text-sm font-medium leading-6 text-gray-900">Jumlah
+                                 Pintu</label>
+                             <div class="mt-2">
+                                 <select id="doors" name="doors"
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
+                                     <option value="">Pilih jumlah pintu</option>
+                                     @for ($d = 2; $d <= 6; $d++)
+                                         <option value="{{ $d }}">
+                                             {{ $d }} pintu</option>
+                                     @endfor
+                                 </select>
+                             </div>
+                         </div>
 
+                         <div class="sm:col-span-3">
+                             <label for="mileage" class="block text-sm font-medium leading-6 text-gray-900">Jarak
+                                 Tempuh (km)</label>
+                             <div class="mt-2">
+                                 <input type="number" name="mileage" id="mileage" placeholder="Contoh: 50000"
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6">
+                             </div>
+                         </div>
+
+                         <div class="col-span-full">
+                             <label for="description"
+                                 class="block text-sm font-medium leading-6 text-gray-900">Deskripsi</label>
+                             <div class="mt-2">
+                                 <textarea name="description" id="description" rows="3" placeholder="Deskripsi mobil..."
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6"></textarea>
+                             </div>
+                         </div>
+
+                         <div class="col-span-full">
+                             <label for="features"
+                                 class="block text-sm font-medium leading-6 text-gray-900">Fitur</label>
+                             <div class="mt-2">
+                                 <textarea id="features" name="features" rows="3"
+                                     placeholder="Contoh: AC, GPS Navigasi, Bluetooth, Jok Kulit, Sunroof"
+                                     class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-400 sm:text-sm sm:leading-6"></textarea>
+                             </div>
+                             <p class="mt-1 text-sm leading-6 text-gray-600">Daftar fitur utama mobil ini, pisahkan
+                                 dengan koma.</p>
+                         </div>
+
+                         <div class="col-span-full">
+                             <div class="mt-2">
+                                 <label class="block text-sm font-medium leading-6 text-gray-900 mb-3">Gambar
+                                     Mobil</label>
+
+                                 <!-- Two Column Layout for Images -->
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     <!-- Upload Gambar Utama -->
+                                     <div>
+                                         <label class="block text-sm font-medium text-gray-700 mb-2">Gambar
+                                             Utama</label>
+
+                                         <div
+                                             class="flex items-center justify-center px-4 py-6 border-2 border-dashed rounded border-gray-300 bg-white">
+                                             <div class="text-center">
+                                                 <svg class="w-8 h-8 mx-auto text-gray-300 mb-1" fill="none"
+                                                     stroke="currentColor" viewBox="0 0 24 24">
+                                                     <path stroke-linecap="round" stroke-linejoin="round"
+                                                         stroke-width="2"
+                                                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                     </path>
+                                                 </svg>
+                                                 <label for="main-image" class="cursor-pointer block">
+                                                     <span class="text-sm text-orange-500 hover:text-orange-600">Upload
+                                                         gambar utama</span>
+                                                     <input id="main-image" name="image" type="file"
+                                                         accept="image/*" class="sr-only"
+                                                         onchange="previewImage(this, 'main-preview')">
+                                                 </label>
+                                                 <p class="text-xs text-gray-400 mt-0.5">PNG, JPG, GIF up to 2MB</p>
+                                             </div>
+                                         </div>
+                                         <div id="main-preview" class="mt-2" style="display: none;">
+                                             <img class="w-full h-24 object-cover rounded border border-gray-200"
+                                                 alt="Main image preview">
+                                         </div>
+                                     </div>
+
+                                     <!-- Upload Gallery Images -->
+                                     <div>
+                                         <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Galeri
+                                             (Opsional)</label>
+
+                                         <div
+                                             class="flex items-center justify-center px-4 py-6 border-2 border-dashed rounded border-gray-300 bg-white">
+                                             <div class="text-center">
+                                                 <svg class="w-8 h-8 mx-auto text-gray-300 mb-1" fill="none"
+                                                     stroke="currentColor" viewBox="0 0 24 24">
+                                                     <path stroke-linecap="round" stroke-linejoin="round"
+                                                         stroke-width="2"
+                                                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                     </path>
+                                                 </svg>
+                                                 <label for="gallery-images" class="cursor-pointer block">
+                                                     <span class="text-sm text-orange-500 hover:text-orange-600">Upload
+                                                         gallery images</span>
+                                                     <input id="gallery-images" name="gallery_images[]"
+                                                         type="file" accept="image/*" multiple class="sr-only"
+                                                         onchange="previewMultipleImages(this, 'gallery-preview')">
+                                                 </label>
+                                                 <p class="text-xs text-gray-400 mt-0.5">Select multiple images</p>
+                                             </div>
+                                         </div>
+                                         <div id="gallery-preview" class="mt-2 grid grid-cols-2 gap-2"
+                                             style="display: none;">
+                                             <!-- Gallery previews will be inserted here -->
+                                         </div>
+                                     </div>
+                                 </div>
+
+                             </div>
+                         </div>
                      </div>
                  </div>
 
-
-                 <div class="flex items-center justify-center mb-6 gap-x-6">
-                     <a href="/admin/cars"
-                         class="w-20 p-1 text-sm font-semibold leading-6 text-center text-gray-900 border-2 rounded-md border-pr-200 hover:bg-white bg-sec-300">Cancel</a>
-                     <button type="submit" onclick="alert('Berhasil Tambahkan Mobil')"
-                         class="w-1/3 px-3 py-2 text-sm font-semibold text-white rounded-md shadow-sm bg-pr-400 hover:bg-pr-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pr-400">Save</button>
+                 <div class="flex items-center justify-center gap-x-6 mb-6">
+                     <a href='/admin/cars'
+                         class="text-sm font-semibold leading-6 text-gray-900 border border-orange-400 px-4 py-2 rounded-md hover:bg-orange-50">Batal</a>
+                     <button type="submit" id="submitBtn"
+                         class="w-1/3 rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600">Tambah
+                         Mobil</button>
                  </div>
-
              </div>
-
-
          </form>
-
      </div>
 
+     <script>
+         function previewImage(input, previewId) {
+             const preview = document.getElementById(previewId);
+             if (input.files && input.files[0]) {
+                 const reader = new FileReader();
+                 reader.onload = function(e) {
+                     preview.querySelector('img').src = e.target.result;
+                     preview.style.display = 'block';
+                 }
+                 reader.readAsDataURL(input.files[0]);
+             }
+         }
 
+         function previewMultipleImages(input, previewId) {
+             const preview = document.getElementById(previewId);
+             preview.innerHTML = '';
 
+             if (input.files) {
+                 Array.from(input.files).forEach((file, index) => {
+                     const reader = new FileReader();
+                     reader.onload = function(e) {
+                         const div = document.createElement('div');
+                         div.className = 'relative';
+                         div.innerHTML = `
+                             <img src="${e.target.result}" class="w-full h-24 object-cover rounded border border-gray-200">
+                             <span class="absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded font-medium">Gallery ${index + 1}</span>
+                         `;
+                         preview.appendChild(div);
+                     }
+                     reader.readAsDataURL(file);
+                 });
+                 preview.style.display = 'grid';
+             }
+         }
+
+         document.getElementById('createCarForm').addEventListener('submit', function(e) {
+             e.preventDefault();
+
+             const form = this;
+             const formData = new FormData(form);
+             const submitBtn = document.getElementById('submitBtn');
+             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+             // Debug: Log form data
+             console.log('=== FORM SUBMIT DEBUG ===');
+             console.log('Form Action:', form.action);
+             console.log('Form Data:');
+             for (let [key, value] of formData.entries()) {
+                 console.log(`  ${key}: ${value}`);
+             }
+
+             // Disable button
+             submitBtn.disabled = true;
+             submitBtn.textContent = 'Menyimpan...';
+
+             // Show loading
+             Swal.fire({
+                 title: 'Memproses...',
+                 text: 'Mohon tunggu, sedang menambahkan mobil baru',
+                 allowOutsideClick: false,
+                 didOpen: () => {
+                     Swal.showLoading();
+                 }
+             });
+
+             // Send request
+             fetch(form.action, {
+                     method: 'POST',
+                     body: formData,
+                     headers: {
+                         'X-CSRF-TOKEN': csrfToken,
+                         'Accept': 'application/json'
+                     }
+                 })
+                 .then(response => {
+                     console.log('Response Status:', response.status);
+                     return response.json();
+                 })
+                 .then(data => {
+                     console.log('Response Data:', data);
+                     if (data.success) {
+                         Swal.fire({
+                             icon: 'success',
+                             title: 'Berhasil!',
+                             text: data.message,
+                             showConfirmButton: false,
+                             timer: 2000
+                         }).then(() => {
+                             window.location.href = '/admin/cars';
+                         });
+                     } else {
+                         // Handle validation errors
+                         let errorMessage = 'Gagal menambahkan mobil';
+                         if (data.errors) {
+                             errorMessage = Object.values(data.errors).flat().join('\n');
+                         } else if (data.message) {
+                             errorMessage = data.message;
+                         }
+
+                         Swal.fire({
+                             icon: 'error',
+                             title: 'Gagal!',
+                             text: errorMessage,
+                             confirmButtonColor: '#3085d6'
+                         });
+
+                         // Re-enable button
+                         submitBtn.disabled = false;
+                         submitBtn.textContent = 'Tambah Mobil';
+                     }
+                 })
+                 .catch(error => {
+                     console.error('Error:', error);
+                     Swal.fire({
+                         icon: 'error',
+                         title: 'Error!',
+                         text: 'Terjadi kesalahan saat menambahkan data: ' + error.message,
+                         confirmButtonColor: '#3085d6'
+                     });
+
+                     // Re-enable button
+                     submitBtn.disabled = false;
+                     submitBtn.textContent = 'Tambah Mobil';
+                 });
+         });
+     </script>
  </body>
 
  </html>

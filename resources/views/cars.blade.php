@@ -11,6 +11,7 @@
       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
       {{-- sweet alert --}}
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
       {{-- flatpickr JS --}}
       @include('flatpickr::components.style')
       @vite('resources/css/app.css')
@@ -32,25 +33,63 @@
                       <img loading="lazy" src="/storage/images/logos/loogo2.png" class="mr-3 h-12" alt="Logo" />
                   </a>
 
-                  <!-- login & Register buttons -->
+                  <!-- User Menu / Auth Buttons -->
                   <div class="flex items-center lg:order-2">
-                      <a href="/">
-                          <button type="button"
-                              class="px-4 lg:px-5 py-2 lg:py-2.5 mr-2 text-white bg-gradient-to-br from-orange-400 to-orange-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm">
-                              Masuk
+                      @if (!session('user_login'))
+                          <a href="/">
+                              <button type="button"
+                                  class="px-4 lg:px-5 py-2 lg:py-2.5 mr-2 text-white bg-gradient-to-br from-orange-400 to-orange-500 hover:bg-gradient-to-bl font-medium rounded-lg text-sm">
+                                  Masuk
+                              </button>
+                          </a>
+                          <a href="/register">
+                              <button
+                                  class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200">
+                                  <span
+                                      class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white text-black rounded-md group-hover:bg-opacity-0">
+                                      Daftar Sekarang
+                                  </span>
+                              </button>
+                          </a>
+                      @else
+                          {{-- Client Dropdown --}}
+                          <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown"
+                              class="text-black bg-pr-400 hover:bg-pr-600 font-medium rounded-lg text-sm px-3 py-2.5 text-center inline-flex items-center"
+                              type="button">
+                              <img loading="lazy" src="/storage/images/user.png" width="24" alt="user icon"
+                                  class="mr-3">
+                              {{ session('user_name') ?? 'Guest' }}
+                              <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor"
+                                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 9l-7 7-7-7"></path>
+                              </svg>
                           </button>
-                      </a>
-                      <a href="/register">
-                          <button
-                              class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200">
-                              <span
-                                  class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white text-black rounded-md group-hover:bg-opacity-0">
-                                  Daftar Sekarang
-                              </span>
-                          </button>
-                      </a>
 
-
+                          <!-- Dropdown menu -->
+                          <div id="dropdown"
+                              class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+                              <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownDefaultButton">
+                                  <li>
+                                      <a href="/profile" class="block px-4 py-2 hover:bg-pr-200">Profile</a>
+                                  </li>
+                                  <li>
+                                      <a href="{{ route('my-reservations') }}"
+                                          class="block px-4 py-2 hover:bg-pr-200">Reservasi Saya</a>
+                                  </li>
+                                  <li>
+                                      <a class="block px-4 py-2 hover:bg-pr-200" href="/logout"
+                                          onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
+                                          Logout
+                                      </a>
+                                      <form id="logout-form" action="/logout" method="POST" class="hidden">
+                                          @csrf
+                                      </form>
+                                  </li>
+                              </ul>
+                          </div>
+                      @endif
                   </div>
 
                   <!-- Menu -->
@@ -91,12 +130,12 @@
               <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                   <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Merek</label>
-                      <input type="text" placeholder="Toyota" name="brand"
+                      <input type="text" placeholder="Toyota" name="brand" value="{{ request('brand') }}"
                           class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
                   </div>
                   <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
-                      <input type="text" placeholder="Camry" name="model"
+                      <input type="text" placeholder="Camry" name="model" value="{{ request('model') }}"
                           class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
                   </div>
                   <div>
@@ -104,13 +143,17 @@
                       <select name="category"
                           class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
                           <option value="">Semua Kategori</option>
-                          <option value="Sedan">Sedan</option>
-                          <option value="City Car">City Car</option>
-                          <option value="SUV">SUV</option>
-                          <option value="Crossover">Crossover</option>
-                          <option value="Double Cabin">Double Cabin</option>
-                          <option value="MPV">MPV</option>
-                          <option value="Hatchback">Hatchback</option>
+                          <option value="Sedan" {{ request('category') == 'Sedan' ? 'selected' : '' }}>Sedan</option>
+                          <option value="City Car" {{ request('category') == 'City Car' ? 'selected' : '' }}>City Car
+                          </option>
+                          <option value="SUV" {{ request('category') == 'SUV' ? 'selected' : '' }}>SUV</option>
+                          <option value="Crossover" {{ request('category') == 'Crossover' ? 'selected' : '' }}>Crossover
+                          </option>
+                          <option value="Double Cabin" {{ request('category') == 'Double Cabin' ? 'selected' : '' }}>
+                              Double Cabin</option>
+                          <option value="MPV" {{ request('category') == 'MPV' ? 'selected' : '' }}>MPV</option>
+                          <option value="Hatchback" {{ request('category') == 'Hatchback' ? 'selected' : '' }}>
+                              Hatchback</option>
                       </select>
                   </div>
                   <div>
@@ -118,8 +161,10 @@
                       <select name="transmission"
                           class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
                           <option value="">Semua</option>
-                          <option value="Otomatis">Otomatis</option>
-                          <option value="Manual">Manual</option>
+                          <option value="Otomatis" {{ request('transmission') == 'Otomatis' ? 'selected' : '' }}>
+                              Otomatis</option>
+                          <option value="Manual" {{ request('transmission') == 'Manual' ? 'selected' : '' }}>Manual
+                          </option>
                       </select>
                   </div>
               </div>
@@ -131,9 +176,12 @@
                       <select name="fuel_type"
                           class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
                           <option value="">Semua</option>
-                          <option value="Bensin">Bensin</option>
-                          <option value="Solar">Solar</option>
-                          <option value="Listrik">Listrik</option>
+                          <option value="Bensin" {{ request('fuel_type') == 'Bensin' ? 'selected' : '' }}>Bensin
+                          </option>
+                          <option value="Solar" {{ request('fuel_type') == 'Solar' ? 'selected' : '' }}>Solar
+                          </option>
+                          <option value="Listrik" {{ request('fuel_type') == 'Listrik' ? 'selected' : '' }}>Listrik
+                          </option>
                       </select>
                   </div>
                   <div>
@@ -141,20 +189,21 @@
                       <select name="seats"
                           class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
                           <option value="">Semua</option>
-                          <option value="2">2+ Kursi</option>
-                          <option value="4">4+ Kursi</option>
-                          <option value="5">5+ Kursi</option>
-                          <option value="7">7+ Kursi</option>
+                          <option value="2" {{ request('seats') == '2' ? 'selected' : '' }}>2+ Kursi</option>
+                          <option value="4" {{ request('seats') == '4' ? 'selected' : '' }}>4+ Kursi</option>
+                          <option value="5" {{ request('seats') == '5' ? 'selected' : '' }}>5+ Kursi</option>
+                          <option value="7" {{ request('seats') == '7' ? 'selected' : '' }}>7+ Kursi</option>
                       </select>
                   </div>
                   <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Harga Minimum</label>
-                      <input type="number" placeholder="0" name="min_price" value=""
+                      <input type="number" placeholder="0" name="min_price" value="{{ request('min_price') }}"
                           class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
                   </div>
                   <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Harga Maksimum</label>
-                      <input type="number" placeholder="1000000" name="max_price" value=""
+                      <input type="number" placeholder="1000000" name="max_price"
+                          value="{{ request('max_price') }}"
                           class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
                   </div>
               </div>
@@ -162,11 +211,11 @@
               <!-- Search and Clear Buttons -->
               <div class="flex justify-between items-center">
                   <div class="flex space-x-3">
-                      <button type="button" onclick="alert('Mencari Mobil')"
+                      <button type="submit"
                           class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-6 rounded-md transition-colors">
                           Cari Mobil
                       </button>
-                      <a href="/cars" onclick="alret('Hapus Filter')"
+                      <a href="/cars"
                           class="bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded-md transition-colors">
                           Hapus Filter
                       </a>
@@ -177,261 +226,118 @@
               </div>
           </form>
       </div>
+
       <div class="mt-6 mb-2 grid md:grid-cols-3 justify-center items-center mx-auto max-w-screen-xl">
-          <!-- Mobil 1: Toyota Camry -->
-          <div
-              class="relative md:m-10 m-4 flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
-              <a class="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl" href="/cars/1">
-                  <img loading="lazy" class="object-cover"
-                      src="https://tse2.mm.bing.net/th/id/OIP.8NigPGR5EtQOGZPAn_gpPgHaEo?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3"
-                      alt="Toyota Camry" />
-                  <span
-                      class="absolute top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">15%
-                      OFF</span>
-              </a>
-              <div class="mt-4 px-5 pb-5">
-                  <div>
-                      <a href="/cars/1">
-                          <h5
-                              class="font-bold text-xl tracking-tight text-slate-900 hover:text-orange-500 transition-colors">
-                              Toyota Camry 2.5L</h5>
-                      </a>
-                  </div>
-                  <div class="mt-2 mb-5 flex items-center justify-between">
-                      <p>
-                          <span class="text-xl font-bold text-slate-900">Rp 425.000</span>
-                          <br>
-                          <span class="text-sm text-slate-900 line-through">Rp 500.000</span>
-                      </p>
-                      <div class="flex items-center ml-1">
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <span class="mr-2 ml-3 rounded bg-orange-300 px-2.5 py-0.5 text-xs font-semibold">5.0</span>
+          @forelse($cars as $car)
+              <!-- Card Mobil: {{ $car->brand }} {{ $car->model }} -->
+              <div
+                  class="relative md:m-10 m-4 flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
+                  <a class="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl"
+                      href="/cars/{{ $car->id }}">
+                      <img loading="lazy" class="object-cover w-full h-full"
+                          src="{{ $car->image ?? 'https://via.placeholder.com/400x300?text=No+Image' }}"
+                          alt="{{ $car->brand }} {{ $car->model }}" />
+                      @if ($car->reduce > 0)
+                          <span
+                              class="absolute top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">
+                              {{ $car->reduce }}% OFF
+                          </span>
+                      @endif
+                      @if ($car->status === 'disewa')
+                          <span
+                              class="absolute top-0 right-0 m-2 rounded-full bg-red-500 px-2 text-center text-sm font-medium text-white">
+                              Disewa
+                          </span>
+                      @elseif($car->status === 'perbaikan')
+                          <span
+                              class="absolute top-0 right-0 m-2 rounded-full bg-yellow-500 px-2 text-center text-sm font-medium text-white">
+                              Perbaikan
+                          </span>
+                      @endif
+                  </a>
+                  <div class="mt-4 px-5 pb-5">
+                      <div>
+                          <a href="/cars/{{ $car->id }}">
+                              <h5
+                                  class="font-bold text-xl tracking-tight text-slate-900 hover:text-orange-500 transition-colors">
+                                  {{ $car->brand }} {{ $car->model }}
+                              </h5>
+                          </a>
+                          <p class="text-sm text-gray-600 mt-1">
+                              {{ $car->category }} • {{ $car->transmission_indonesian }} • {{ $car->seats }} Kursi
+                          </p>
                       </div>
-                  </div>
-                  <a href="/cars/1"
-                      class="flex items-center justify-center rounded-md bg-slate-900 hover:bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
-                      <svg class="mr-4 h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                          <path fill-rule="evenodd"
-                              d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                              clip-rule="evenodd" />
-                      </svg>
-                      Lihat Detail</a>
-              </div>
-          </div>
-
-          <!-- Mobil 2: Honda Civic -->
-          <div
-              class="relative md:m-10 m-4 flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
-              <a class="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl" href="/cars/2">
-                  <img loading="lazy" class="object-cover"
-                      src="https://tse2.mm.bing.net/th/id/OIP.8NigPGR5EtQOGZPAn_gpPgHaEo?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3"
-                      alt="Honda Civic" />
-                  <span
-                      class="absolute top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">10%
-                      OFF</span>
-              </a>
-              <div class="mt-4 px-5 pb-5">
-                  <div>
-                      <a href="/cars/2">
-                          <h5
-                              class="font-bold text-xl tracking-tight text-slate-900 hover:text-orange-500 transition-colors">
-                              Honda Civic 1.8L</h5>
-                      </a>
-                  </div>
-                  <div class="mt-2 mb-5 flex items-center justify-between">
-                      <p>
-                          <span class="text-xl font-bold text-slate-900">Rp 405.000</span>
-                          <br>
-                          <span class="text-sm text-slate-900 line-through">Rp 450.000</span>
-                      </p>
-                      <div class="flex items-center ml-1">
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <span class="mr-2 ml-3 rounded bg-orange-300 px-2.5 py-0.5 text-xs font-semibold">4.0</span>
+                      <div class="mt-2 mb-5 flex items-center justify-between">
+                          <p>
+                              @if ($car->reduce > 0)
+                                  <span
+                                      class="text-xl font-bold text-slate-900">{{ $car->formatted_discounted_price }}</span>
+                                  <br>
+                                  <span class="text-sm text-slate-900 line-through">{{ $car->formatted_price }}</span>
+                              @else
+                                  <span class="text-xl font-bold text-slate-900">{{ $car->formatted_price }}</span>
+                                  <br>
+                                  <span class="text-sm text-gray-500">per hari</span>
+                              @endif
+                          </p>
+                          <div class="flex items-center ml-1">
+                              @for ($i = 1; $i <= 5; $i++)
+                                  @if ($i <= $car->stars)
+                                      <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
+                                          viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                          <path
+                                              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                          </path>
+                                      </svg>
+                                  @else
+                                      <svg aria-hidden="true" class="h-5 w-5 text-gray-300" fill="currentColor"
+                                          viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                          <path
+                                              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                          </path>
+                                      </svg>
+                                  @endif
+                              @endfor
+                              <span
+                                  class="mr-2 ml-3 rounded bg-orange-300 px-2.5 py-0.5 text-xs font-semibold">{{ number_format($car->stars, 1) }}</span>
+                          </div>
                       </div>
+                      <a href="/cars/{{ $car->id }}"
+                          class="flex items-center justify-center rounded-md bg-slate-900 hover:bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors">
+                          <svg class="mr-4 h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path fill-rule="evenodd"
+                                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                  clip-rule="evenodd" />
+                          </svg>
+                          Lihat Detail</a>
                   </div>
-                  <a href="/cars/2"
-                      class="flex items-center justify-center rounded-md bg-slate-900 hover:bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
-                      <svg class="mr-4 h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                          <path fill-rule="evenodd"
-                              d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                              clip-rule="evenodd" />
-                      </svg>
-                      Lihat Detail</a>
               </div>
-          </div>
-
-          <!-- Mobil 3: BMW X5 -->
-          <div
-              class="relative md:m-10 m-4 flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
-              <a class="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl" href="/cars/3">
-                  <img loading="lazy" class="object-cover"
-                      src="https://tse2.mm.bing.net/th/id/OIP.8NigPGR5EtQOGZPAn_gpPgHaEo?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3"
-                      alt="BMW X5" />
-                  <span
-                      class="absolute top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">20%
-                      OFF</span>
-              </a>
-              <div class="mt-4 px-5 pb-5">
-                  <div>
-                      <a href="/cars/3">
-                          <h5
-                              class="font-bold text-xl tracking-tight text-slate-900 hover:text-orange-500 transition-colors">
-                              BMW X5 3.0L</h5>
-                      </a>
-                  </div>
-                  <div class="mt-2 mb-5 flex items-center justify-between">
-                      <p>
-                          <span class="text-xl font-bold text-slate-900">Rp 960.000</span>
-                          <br>
-                          <span class="text-sm text-slate-900 line-through">Rp 1.200.000</span>
-                      </p>
-                      <div class="flex items-center ml-1">
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <svg aria-hidden="true" class="h-5 w-5 text-orange-400" fill="currentColor"
-                              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                              </path>
-                          </svg>
-                          <span class="mr-2 ml-3 rounded bg-orange-300 px-2.5 py-0.5 text-xs font-semibold">5.0</span>
-                      </div>
-                  </div>
-                  <a href="/cars/3"
-                      class="flex items-center justify-center rounded-md bg-slate-900 hover:bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
-                      <svg class="mr-4 h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                          <path fill-rule="evenodd"
-                              d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                              clip-rule="evenodd" />
-                      </svg>
-                      Lihat Detail</a>
+          @empty
+              <div class="col-span-3 text-center py-12">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada mobil ditemukan</h3>
+                  <p class="mt-1 text-sm text-gray-500">Coba ubah filter pencarian Anda.</p>
               </div>
-          </div>
+          @endforelse
       </div>
+
+
       <footer role="navigation" aria-label="Pagination Navigation"
           class="flex items-center justify-center mt-6 mb-8">
           <div class="flex flex-col justify-center items-center">
-              <div>
-                  <span class="relative z-0 inline-flex shadow-sm rounded-md">
-                      <!-- Tombol Previous (disabled) -->
-                      <span aria-disabled="true">
-                          <span
-                              class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 cursor-default rounded-l-md leading-5"
-                              aria-hidden="true">
-                              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fill-rule="evenodd"
-                                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                      clip-rule="evenodd" />
-                              </svg>
-                          </span>
-                      </span>
-
-                      <!-- Nomor halaman -->
-                      <a href="/cars"
-                          class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-orange-500 bg-white border border-gray-300 cursor-default leading-5">1</a>
-                      <a href="/cars"
-                          class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-orange-500 transition">2</a>
-                      <a href="/cars"
-                          class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-orange-500 transition">3</a>
-                      <span
-                          class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-400 bg-white border border-gray-300 cursor-default leading-5">...</span>
-                      <a href="/cars"
-                          class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-orange-500 transition">10</a>
-
-                      <!-- Tombol Next -->
-                      <a href="/cars"
-                          class="relative inline-flex items-center px-2 py-2 -ml-px text-sm font-medium text-orange-500 bg-white border border-gray-300 rounded-r-md leading-5 hover:text-gray-400 transition">
-                          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                              <path fill-rule="evenodd"
-                                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                  clip-rule="evenodd" />
-                          </svg>
-                      </a>
-                  </span>
-              </div>
+              {{ $cars->links() }}
 
               <!-- Info halaman -->
               <div class="mt-2">
                   <p class="text-sm text-gray-700 leading-5">
-                      Menampilkan <span class="font-medium">1</span> hingga <span class="font-medium">3</span> dari
-                      <span class="font-medium">3</span> hasil
+                      Menampilkan <span class="font-medium">{{ $cars->firstItem() ?? 0 }}</span> hingga <span
+                          class="font-medium">{{ $cars->lastItem() ?? 0 }}</span> dari
+                      <span class="font-medium">{{ $cars->total() }}</span> hasil
                   </p>
               </div>
           </div>

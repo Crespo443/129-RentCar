@@ -63,7 +63,7 @@
                     class="text-black bg-pr-400 hover:bg-pr-600 font-medium rounded-lg text-sm px-3 py-2.5 text-center inline-flex items-center "
                     type="button">
                     <img loading="lazy" src="/storage/images/user.png" width="24" alt="user icon" class="mr-3">
-                    Test User
+                    {{ session('user_name') ?? 'Guest' }}
                     <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
@@ -76,6 +76,10 @@
                     <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownDefaultButton">
                         <li>
                             <a href="/profile" class="block px-4 py-2 hover:bg-pr-200">Profil</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('my-reservations') }}" class="block px-4 py-2 hover:bg-pr-200">Reservasi
+                                Saya</a>
                         </li>
                         <li>
                             <a class="block px-4 py-2 hover:bg-pr-200 " href="/logout"
@@ -115,15 +119,17 @@
             <!-- Left Section -->
             <div class="md:w-2/3  md:border-r border-gray-800 p-2">
 
-                <h2 class=" ms-4 max-w-full font-bold md:text-6xl text-4xl">BMW X5 3.0L Turbo</h2>
+                <h2 class=" ms-4 max-w-full font-bold md:text-6xl text-4xl">{{ $car->brand }} {{ $car->model }}</h2>
 
                 <div class=" flex items-end mt-8 ms-4">
                     <h3 class="text-gray-500 text-2xl">Harga:</h3>
                     <p>
                         <span
-                            class=" text-3xl font-bold text-orange-500 ms-3 me-1 border border-orange-500 p-2 rounded-md">Rp
-                            960.000</span>
-                        <span class="text-lg font-medium text-red-500 line-through">Rp 1.200.000</span>
+                            class=" text-3xl font-bold text-orange-500 ms-3 me-1 border border-orange-500 p-2 rounded-md">{{ $car->formatted_discounted_price }}</span>
+                        @if ($car->reduce > 0)
+                            <span
+                                class="text-lg font-medium text-red-500 line-through">{{ $car->formatted_price }}</span>
+                        @endif
                     </p>
                 </div>
 
@@ -153,34 +159,44 @@
 
                         <div class="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
                             <p class="text-sm text-green-700">
-                                Anda belum memiliki reservasi aktif. Anda bisa membuat hingga 2 reservasi aktif.
+                                Pastikan Data Yang Input sesuai.
                             </p>
                         </div>
                     </div>
                 </div>
 
                 <div class="px-6 md:me-8">
-                    <form id="reservation_form" method="POST" action="/reservations/1">
+                    <form id="reservation_form" method="POST" action="{{ route('reservations.store') }}">
                         @csrf
+                        <input type="hidden" name="car_id" value="{{ $car->id }}">
+
+                        <!-- User Info Display -->
+                        @if (session('user_login'))
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                <h3 class="text-sm font-semibold text-blue-800 mb-2">Informasi Pemesan</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <span class="text-gray-600">Nama:</span>
+                                        <span class="font-medium text-gray-900 ml-2">{{ session('user_name') }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-600">Email:</span>
+                                        <span
+                                            class="font-medium text-gray-900 ml-2">{{ session('user_email') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                                <p class="text-sm text-red-700">Anda harus login terlebih dahulu untuk membuat
+                                    reservasi.</p>
+                                <a href="/"
+                                    class="inline-block mt-2 text-sm text-red-600 hover:text-red-800 font-medium">Login
+                                    Sekarang</a>
+                            </div>
+                        @endif
+
                         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-
-                            <div class="sm:col-span-3">
-                                <label for="full-name" class="block text-sm font-medium leading-6 text-gray-900">Nama
-                                    Lengkap</label>
-                                <div class="mt-2">
-                                    <input type="text" name="full-name" id="full-name" value=""
-                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
-                                </div>
-                            </div>
-
-                            <div class="sm:col-span-3">
-                                <label for="email"
-                                    class="block text-sm font-medium leading-6 text-gray-900">Email</label>
-                                <div class="mt-2">
-                                    <input type="text" name="email" id="email" value=""
-                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6">
-                                </div>
-                            </div>
                             {{-- Custom Date Range Picker --}}
                             <div class="sm:col-span-full">
                                 <label for="reservation_dates"
@@ -194,9 +210,9 @@
                                             <label
                                                 class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Tanggal
                                                 Mulai</label>
-                                            <input type="date" id="start_date" name="start_date"
+                                            <input type="date" id="start_date" name="start_date" required
                                                 class="block w-full rounded-lg border-2 border-gray-200 py-3 px-4 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 hover:border-gray-300 bg-white"
-                                                min="2025-11-12">
+                                                min="{{ date('Y-m-d') }}">
                                             <div
                                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none mt-8">
                                                 <svg class="w-5 h-5 text-gray-400" fill="currentColor"
@@ -213,9 +229,9 @@
                                             <label
                                                 class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Tanggal
                                                 Selesai</label>
-                                            <input type="date" id="end_date" name="end_date"
+                                            <input type="date" id="end_date" name="end_date" required
                                                 class="block w-full rounded-lg border-2 border-gray-200 py-3 px-4 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 hover:border-gray-300 bg-white"
-                                                min="2025-11-12">
+                                                min="{{ date('Y-m-d') }}">
                                             <div
                                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none mt-8">
                                                 <svg class="w-5 h-5 text-gray-400" fill="currentColor"
@@ -271,9 +287,22 @@
                                 </div>
 
                             </div>
+
+                            <!-- Notes Field -->
+                            <div class="sm:col-span-full">
+                                <label for="notes"
+                                    class="block text-sm font-medium leading-6 text-gray-900">Catatan
+                                    (Opsional)</label>
+                                <div class="mt-2">
+                                    <textarea name="notes" id="notes" rows="3" maxlength="500"
+                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-500 sm:text-sm sm:leading-6"
+                                        placeholder="Tambahkan catatan khusus untuk reservasi Anda..."></textarea>
+                                    <p class="mt-1 text-xs text-gray-500">Maksimal 500 karakter</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mt-12 md:block hidden  ">
-                            <button type="submit" id="submit-btn" onclick="alert('Berhasil Membuat Pesanan')"
+                        <div class="mt-12 md:block hidden">
+                            <button type="submit" id="submit-btn"
                                 class="text-white p-3 w-full rounded-lg font-bold shadow-xl transition-all duration-200 bg-orange-500 hover:bg-black hover:shadow-none">
                                 Buat Reservasi
                             </button>
@@ -288,46 +317,29 @@
             <div class="md:w-1/3 flex flex-col justify-start items-center">
                 <div class="relative mx-3 mt-3 flex h-[200px] w-3/4   overflow-hidden rounded-xl shadow-lg">
                     <img loading="lazy" class="h-full w-full object-cover"
-                        src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400" alt="BMW X5" />
-                    <span
-                        class="absolute w-24 h-8 py-1 top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">20%
-                        OFF</span>
+                        src="{{ $car->image ?? 'https://via.placeholder.com/400x300?text=No+Image' }}"
+                        alt="{{ $car->brand }} {{ $car->model }}" />
+                    @if ($car->reduce > 0)
+                        <span
+                            class="absolute w-24 h-8 py-1 top-0 left-0 m-2 rounded-full bg-orange-500 px-2 text-center text-sm font-medium text-white">{{ $car->reduce }}%
+                            OFF</span>
+                    @endif
                 </div>
-                <p class=" ms-4 max-w-full text-xl mt-3 md:block hidden font-semibold">BMW X5 3.0L Turbo</p>
+                <p class=" ms-4 max-w-full text-xl mt-3 md:block hidden font-semibold">{{ $car->brand }}
+                    {{ $car->model }}</p>
                 <div class="mt-3 ms-4 md:block hidden">
                     <div class="flex items-center">
-                        <svg aria-hidden="true" class="h-4 w-4 text-orange-400" fill="currentColor"
-                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                            </path>
-                        </svg>
-                        <svg aria-hidden="true" class="h-4 w-4 text-orange-400" fill="currentColor"
-                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                            </path>
-                        </svg>
-                        <svg aria-hidden="true" class="h-4 w-4 text-orange-400" fill="currentColor"
-                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                            </path>
-                        </svg>
-                        <svg aria-hidden="true" class="h-4 w-4 text-orange-400" fill="currentColor"
-                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                            </path>
-                        </svg>
-                        <svg aria-hidden="true" class="h-4 w-4 text-orange-400" fill="currentColor"
-                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                            </path>
-                        </svg>
+                        @for ($i = 1; $i <= 5; $i++)
+                            <svg aria-hidden="true"
+                                class="h-4 w-4 {{ $i <= $car->stars ? 'text-orange-400' : 'text-gray-300' }}"
+                                fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                </path>
+                            </svg>
+                        @endfor
                         <span
-                            class="mr-2 ml-3 rounded bg-orange-400 px-2.5 py-0.5 text-sm font-semibold text-white">5.0</span>
+                            class="mr-2 ml-3 rounded bg-orange-400 px-2.5 py-0.5 text-sm font-semibold text-white">{{ number_format($car->stars, 1) }}</span>
                     </div>
                 </div>
 
@@ -345,8 +357,8 @@
                         </span>
                     </p>
                 </div>
-                <div id="mobile_submit_button" class="mt-12 w-full md:hidden  ">
-                    <button type="submit" onclick="submitReservation(event)"
+                <div id="mobile_submit_button" class="mt-12 w-full md:hidden">
+                    <button type="button" onclick="submitReservation(event)"
                         class="text-white p-3 w-full rounded-lg font-bold shadow-xl transition-all duration-200 bg-orange-500 hover:bg-black hover:shadow-none">
                         Buat Reservasi
                     </button>
@@ -356,11 +368,15 @@
     </div>
 
     <script>
-        const pricePerDay = 960000;
+        const pricePerDay = {{ $car->discounted_price }};
+        const minRentalDays = {{ $car->minimum_rental_days }};
 
         // Calculate duration and total price when dates change
         document.getElementById('start_date').addEventListener('change', updateCalculations);
         document.getElementById('end_date').addEventListener('change', updateCalculations);
+
+        // Add form submit handler
+        document.getElementById('reservation_form').addEventListener('submit', submitReservation);
 
         function updateCalculations() {
             const startDate = document.getElementById('start_date').value;
@@ -373,6 +389,18 @@
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                 if (diffDays > 0 && end >= start) {
+                    // Check minimum rental days
+                    if (diffDays < minRentalDays) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Durasi Sewa Kurang',
+                            text: `Minimal sewa untuk mobil ini adalah ${minRentalDays} hari.`,
+                            confirmButtonColor: '#f97316'
+                        });
+                        document.getElementById('end_date').value = '';
+                        return;
+                    }
+
                     // Update duration display
                     document.getElementById('duration').innerHTML =
                         `Durasi: <span class="mx-2 text-md font-medium text-gray-700 border border-orange-500 p-2 rounded-md">${diffDays} Hari</span>`;
@@ -395,7 +423,12 @@
                     // Update hidden field
                     document.getElementById('reservation_dates').value = `${startDate} to ${endDate}`;
                 } else {
-                    alert('Tanggal selesai harus setelah tanggal mulai');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Tanggal Tidak Valid',
+                        text: 'Tanggal selesai harus setelah tanggal mulai',
+                        confirmButtonColor: '#f97316'
+                    });
                     document.getElementById('end_date').value = '';
                 }
             }
@@ -415,8 +448,6 @@
 
             const startDate = document.getElementById('start_date').value;
             const endDate = document.getElementById('end_date').value;
-            const fullName = document.getElementById('full-name').value;
-            const email = document.getElementById('email').value;
 
             if (!startDate || !endDate) {
                 Swal.fire({
@@ -428,16 +459,21 @@
                 return false;
             }
 
-            if (!fullName || !email) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Mohon lengkapi nama dan email!',
-                    confirmButtonColor: '#f97316'
-                });
-                return false;
-            }
-            document.getElementById('reservation_form').submit();
+            // Confirm before submitting
+            Swal.fire({
+                title: 'Konfirmasi Reservasi',
+                text: 'Apakah Anda yakin ingin membuat reservasi ini?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Buat Reservasi',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('reservation_form').submit();
+                }
+            });
         }
     </script>
 </body>

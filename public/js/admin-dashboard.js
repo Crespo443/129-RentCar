@@ -29,9 +29,8 @@ function toggleDropdown(dropdownId) {
 }
 
 function openReturnModal(reservationId, carName) {
-    document.getElementById(
-        "modalTitle"
-    ).textContent = `Tandai Sebagai Telah Dikembalikan - ${carName}`;
+    document.getElementById("modalTitle").textContent =
+        `Tandai Sebagai Telah Dikembalikan - ${carName}`;
     // Simpan data untuk digunakan saat submit
     window.currentEditData = { reservationId, carName };
     document.getElementById("returnModal").classList.remove("hidden");
@@ -45,7 +44,19 @@ function closeReturnModal() {
 function openStatusModal(reservationId, carName, currentStatus) {
     document.getElementById("statusCarName").textContent = `Mobil: ${carName}`;
     document.getElementById("currentStatus").textContent = currentStatus;
-    document.getElementById("status").value = currentStatus;
+
+    // Map display status to database value
+    const statusMap = {
+        Menunggu: "menunggu",
+        Dikonfirmasi: "dikonfirmasi",
+        Aktif: "sedang_berlangsung",
+        Selesai: "selesai",
+        Dibatalkan: "dibatalkan",
+    };
+
+    const dbStatus = statusMap[currentStatus] || "menunggu";
+    document.getElementById("status").value = dbStatus;
+
     // Simpan data untuk digunakan saat submit
     window.currentEditData = { reservationId, carName, currentStatus };
     document.getElementById("statusModal").classList.remove("hidden");
@@ -58,9 +69,18 @@ function closeStatusModal() {
 // Payment Modal Functions
 function openPaymentModal(reservationId, carName, currentPayment) {
     document.getElementById("paymentCarName").textContent = `Mobil: ${carName}`;
-    document.getElementById("currentPayment").textContent =
-        currentPayment.charAt(0).toUpperCase() + currentPayment.slice(1);
-    document.getElementById("payment_status").value = currentPayment;
+    document.getElementById("currentPayment").textContent = currentPayment;
+
+    // Map display payment to database value
+    const paymentMap = {
+        "Belum Bayar": "belum_bayar",
+        DP: "dp",
+        Lunas: "lunas",
+    };
+
+    const dbPayment = paymentMap[currentPayment] || "belum_bayar";
+    document.getElementById("payment_status").value = dbPayment;
+
     // Simpan data untuk digunakan saat submit
     window.currentEditData = { reservationId, carName, currentPayment };
     document.getElementById("paymentModal").classList.remove("hidden");
@@ -74,95 +94,186 @@ function closePaymentModal() {
 function openActionsModal(
     reservationId,
     carName,
-    returnStatus,
-    reservationStatus
+    paymentStatus,
+    reservationStatus,
 ) {
     // Store reservation data globally
     window.currentReservationId = reservationId;
     window.currentReservation = {
         reservationId,
         carName,
-        returnStatus,
+        paymentStatus,
         reservationStatus,
     };
 
     const modal = document.getElementById("actionsModal");
     const carNameElement = document.getElementById("actionsCarName");
-    const editStatusLink = document.getElementById("editStatusLink");
-    const editPaymentLink = document.getElementById("editPaymentLink");
-    const markReturnedBtn = document.getElementById("markReturnedBtn");
-    const returnBtnText = document.getElementById("returnBtnText");
-    const cancelReservationBtn = document.getElementById(
-        "cancelReservationBtn"
-    );
-    const cancelBtnText = document.getElementById("cancelBtnText");
 
     // Set car name
     carNameElement.textContent = `Mobil: ${carName}`;
 
-    // Set up modal buttons instead of links
-    editStatusLink.onclick = function (e) {
-        e.preventDefault();
+    // Show modal
+    modal.classList.remove("hidden");
+
+    // Setup button click handlers
+    document.getElementById("editStatusLink").onclick = function () {
         closeActionsModal();
         openStatusModal(reservationId, carName, reservationStatus);
     };
 
-    editPaymentLink.onclick = function (e) {
-        e.preventDefault();
+    document.getElementById("editPaymentLink").onclick = function () {
         closeActionsModal();
-        // Ini akan memerlukan data status pembayaran yang sebenarnya
-        // Untuk demo ini, kita hardcode 'pending'
-        const reservationsData = {
-            1: "Paid",
-            2: "pending",
-            3: "Paid",
-            4: "Paid",
-            5: "Canceled",
-        };
-        openPaymentModal(
-            reservationId,
-            carName,
-            reservationsData[reservationId] || "pending"
-        );
+        openPaymentModal(reservationId, carName, paymentStatus);
     };
 
-    // Handle return button
-    if (returnStatus === "returned") {
-        markReturnedBtn.classList.add("opacity-50", "cursor-not-allowed");
-        markReturnedBtn.disabled = true;
-        returnBtnText.textContent = "Sudah Dikembalikan";
-        markReturnedBtn.onclick = null;
-    } else {
-        markReturnedBtn.classList.remove("opacity-50", "cursor-not-allowed");
-        markReturnedBtn.disabled = false;
-        returnBtnText.textContent = "Tandai Sudah Kembali";
+    document.getElementById("markReturnedBtn").onclick = function () {
+        closeActionsModal();
+        openReturnModal(reservationId, carName);
+    };
+}
+
+function closeActionsModal() {
+    document.getElementById("actionsModal").classList.add("hidden");
+}
+
+function cancelReservation() {
+    if (!window.currentReservationId) {
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "ID Reservasi tidak ditemukan",
+            confirmButtonColor: "#3085d6",
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: "Batalkan Reservasi?",
+        text: "Apakah Anda yakin ingin membatalkan reservasi ini?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Ya, Batalkan!",
+        cancelButtonText: "Tidak",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const csrfToken = document.querySelector(
+                'meta[name="csrf-token"]',
+            ).content;
+
+            Swal.fire({
+                title: "Memproses...",
+                text: "Mohon tunggu",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            fetch(`/admin/reservations/${window.currentReservationId}/cancel`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken,
+                },
+            })
+                .then((response) => {
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log("Response data:", data);
+                    if (data.success) {
+                        closeActionsModal();
+                        Swal.fire({
+                            icon: "success",
+                            title: "Berhasil!",
+                            text: data.message,
+                            confirmButtonColor: "#3085d6",
+                            timer: 2000,
+                        }).then(() => {
+                            // Force hard reload to get fresh data
+                            window.location.href =
+                                window.location.href.split("?")[0] +
+                                "?t=" +
+                                new Date().getTime();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Gagal",
+                            text: data.message || "Gagal membatalkan reservasi",
+                            confirmButtonColor: "#3085d6",
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text:
+                            "Terjadi kesalahan saat membatalkan reservasi: " +
+                            error.message,
+                        confirmButtonColor: "#3085d6",
+                    });
+                });
+        }
+    });
+}
+
+// Open actions modal
+function openActionsModal(
+    reservationId,
+    carName,
+    paymentStatus,
+    reservationStatus,
+) {
+    const modal = document.getElementById("actionsModal");
+    const carNameElement = document.getElementById("actionsCarName");
+    const editStatusLink = document.getElementById("editStatusLink");
+    const editPaymentLink = document.getElementById("editPaymentLink");
+    const markReturnedBtn = document.getElementById("markReturnedBtn");
+    const cancelReservationBtn = document.getElementById(
+        "cancelReservationBtn",
+    );
+
+    // Store current reservation ID globally
+    window.currentReservationId = reservationId;
+
+    if (carNameElement) {
+        carNameElement.textContent = `Mobil: ${carName}`;
+    }
+
+    // Set up modal buttons
+    if (editStatusLink) {
+        editStatusLink.onclick = function (e) {
+            e.preventDefault();
+            closeActionsModal();
+            openStatusModal(reservationId, carName, reservationStatus);
+        };
+    }
+
+    if (editPaymentLink) {
+        editPaymentLink.onclick = function (e) {
+            e.preventDefault();
+            closeActionsModal();
+            openPaymentModal(reservationId, carName, paymentStatus);
+        };
+    }
+
+    if (markReturnedBtn) {
         markReturnedBtn.onclick = function () {
             closeActionsModal();
             openReturnModal(reservationId, carName);
         };
     }
 
-    // Handle cancel button based on reservation status
-    if (reservationStatus === "Canceled" || reservationStatus === "Ended") {
-        cancelReservationBtn.classList.add("opacity-50", "cursor-not-allowed");
-        cancelReservationBtn.disabled = true;
-        cancelReservationBtn.onclick = null;
-        cancelBtnText.textContent =
-            reservationStatus === "Canceled"
-                ? "Sudah Dibatalkan"
-                : "Tidak Bisa Dibatalkan (Selesai)";
-    } else {
-        cancelReservationBtn.classList.remove(
-            "opacity-50",
-            "cursor-not-allowed"
-        );
-        cancelReservationBtn.disabled = false;
-        cancelReservationBtn.onclick = cancelReservation;
-        cancelBtnText.textContent = "Batalkan Reservasi";
-    }
-
     // Show modal
-    modal.classList.remove("hidden");
+    if (modal) {
+        modal.classList.remove("hidden");
+    }
 }
 
 function closeActionsModal() {
@@ -204,28 +315,92 @@ if (returnModalElement) {
     });
 }
 
-// Cancel reservation function
-function cancelReservation() {
-    if (confirm("Yakin ingin membatalkan reservasi ini?")) {
-        closeActionsModal();
-        alert("Berhasil! Reservasi berhasil dibatalkan");
-        window.location.reload();
-    }
-}
-
-// Form submission handlers - UI only (no backend)
+// Form submission handlers with backend integration
 document.addEventListener("DOMContentLoaded", function () {
     const statusForm = document.getElementById("statusForm");
     if (statusForm) {
         statusForm.addEventListener("submit", function (e) {
             e.preventDefault();
             const newStatus = document.getElementById("status").value;
-            closeStatusModal();
+            const reservationId = window.currentEditData?.reservationId;
 
-            alert(
-                `Berhasil! Status reservasi berhasil diubah menjadi ${newStatus}`
-            );
-            window.location.reload();
+            console.log("Submitting status update:", {
+                reservationId,
+                newStatus,
+            });
+
+            if (!reservationId) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "ID Reservasi tidak ditemukan",
+                    confirmButtonColor: "#3085d6",
+                });
+                return;
+            }
+
+            const csrfToken = document.querySelector(
+                'meta[name="csrf-token"]',
+            ).content;
+
+            Swal.fire({
+                title: "Memproses...",
+                text: "Mohon tunggu",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            fetch(`/admin/reservations/${reservationId}/update-status`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken,
+                },
+                body: JSON.stringify({ status: newStatus }),
+            })
+                .then((response) => {
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log("Response data:", data);
+                    if (data.success) {
+                        closeStatusModal();
+                        Swal.fire({
+                            icon: "success",
+                            title: "Berhasil!",
+                            text: data.message,
+                            confirmButtonColor: "#3085d6",
+                            timer: 2000,
+                        }).then(() => {
+                            // Force hard reload to get fresh data
+                            window.location.href =
+                                window.location.href.split("?")[0] +
+                                "?t=" +
+                                new Date().getTime();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Gagal",
+                            text: data.message || "Gagal mengupdate status",
+                            confirmButtonColor: "#3085d6",
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text:
+                            "Terjadi kesalahan saat mengupdate status: " +
+                            error.message,
+                        confirmButtonColor: "#3085d6",
+                    });
+                });
         });
     }
 
@@ -234,12 +409,87 @@ document.addEventListener("DOMContentLoaded", function () {
         paymentForm.addEventListener("submit", function (e) {
             e.preventDefault();
             const newPayment = document.getElementById("payment_status").value;
-            closePaymentModal();
+            const reservationId = window.currentEditData?.reservationId;
 
-            alert(
-                `Berhasil! Status pembayaran berhasil diubah menjadi ${newPayment}`
-            );
-            window.location.reload();
+            console.log("Submitting payment update:", {
+                reservationId,
+                newPayment,
+            });
+
+            if (!reservationId) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "ID Reservasi tidak ditemukan",
+                    confirmButtonColor: "#3085d6",
+                });
+                return;
+            }
+
+            const csrfToken = document.querySelector(
+                'meta[name="csrf-token"]',
+            ).content;
+
+            Swal.fire({
+                title: "Memproses...",
+                text: "Mohon tunggu",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            fetch(`/admin/reservations/${reservationId}/update-payment`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken,
+                },
+                body: JSON.stringify({ payment_status: newPayment }),
+            })
+                .then((response) => {
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log("Response data:", data);
+                    if (data.success) {
+                        closePaymentModal();
+                        Swal.fire({
+                            icon: "success",
+                            title: "Berhasil!",
+                            text: data.message,
+                            confirmButtonColor: "#3085d6",
+                            timer: 2000,
+                        }).then(() => {
+                            // Force hard reload to get fresh data
+                            window.location.href =
+                                window.location.href.split("?")[0] +
+                                "?t=" +
+                                new Date().getTime();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Gagal",
+                            text:
+                                data.message ||
+                                "Gagal mengupdate status pembayaran",
+                            confirmButtonColor: "#3085d6",
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text:
+                            "Terjadi kesalahan saat mengupdate status pembayaran: " +
+                            error.message,
+                        confirmButtonColor: "#3085d6",
+                    });
+                });
         });
     }
 
@@ -250,10 +500,91 @@ document.addEventListener("DOMContentLoaded", function () {
             const returnDate =
                 document.getElementById("actual_return_date").value;
             const returnNotes = document.getElementById("return_notes").value;
-            closeReturnModal();
+            const reservationId = window.currentEditData?.reservationId;
 
-            alert("Berhasil! Mobil berhasil ditandai sebagai dikembalikan!");
-            window.location.reload();
+            console.log("Submitting return:", {
+                reservationId,
+                returnDate,
+                returnNotes,
+            });
+
+            if (!reservationId) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "ID Reservasi tidak ditemukan",
+                    confirmButtonColor: "#3085d6",
+                });
+                return;
+            }
+
+            const csrfToken = document.querySelector(
+                'meta[name="csrf-token"]',
+            ).content;
+
+            Swal.fire({
+                title: "Memproses...",
+                text: "Mohon tunggu",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            fetch(`/admin/reservations/${reservationId}/mark-returned`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken,
+                },
+                body: JSON.stringify({
+                    actual_return_date: returnDate,
+                    return_notes: returnNotes,
+                }),
+            })
+                .then((response) => {
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log("Response data:", data);
+                    if (data.success) {
+                        closeReturnModal();
+                        Swal.fire({
+                            icon: "success",
+                            title: "Berhasil!",
+                            text: data.message,
+                            confirmButtonColor: "#3085d6",
+                            timer: 2000,
+                        }).then(() => {
+                            // Force hard reload to get fresh data
+                            window.location.href =
+                                window.location.href.split("?")[0] +
+                                "?t=" +
+                                new Date().getTime();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Gagal",
+                            text:
+                                data.message ||
+                                "Gagal menandai mobil sebagai dikembalikan",
+                            confirmButtonColor: "#3085d6",
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text:
+                            "Terjadi kesalahan saat menandai mobil sebagai dikembalikan: " +
+                            error.message,
+                        confirmButtonColor: "#3085d6",
+                    });
+                });
         });
     }
 });
